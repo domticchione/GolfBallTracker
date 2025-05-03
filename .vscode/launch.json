@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Golf Ball Tracker",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Tracker_Main.py",
+            "args": [
+                "golf_shot.mp4",
+                "golf_ball_template.png",
+                "original"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "justMyCode": false, 
+        }
+    ],
+    "OptionsForDisplayOutput": "original, grayscale, edges, roi",
+    "FileNamesAvailable": "golf_shot.mp4, golf_shot_1.mp4, golf_shot_2.mp4"
+}
