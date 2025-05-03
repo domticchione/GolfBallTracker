@@ -1,0 +1,13 @@
+Pull Latest Changes From GIT:
+git pull origin master
+
+Push Latest Changes to GIT:
+git add .
+git commit -m "Your commit message"
+git push origin master
+
+Discard Local Changes:
+git reset --hard
+
+Files Never Added to GIT:
+git clean -fd
