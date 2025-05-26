@@ -2,11 +2,11 @@ import cv2
 import numpy as np
 import os
 import sys
-from Detector_Shaft import ShaftDetector
-from Detector_Ball import Detector_Ball
-from Tracker_Ball import BallTracker
-from Grass_Filter import GrassFilter
-from States import State
+from Detectors.Detector_Shaft import ShaftDetector
+from Detectors.Detector_Ball import BallDetector
+from Trackers.Tracker_Ball import BallTracker
+from Misc.Grass_Filter import GrassFilter
+from Misc.States import State
 
 class GolfBallDetector:
     def __init__(self, video_path, template_path, display_mode="original"):
