@@ -2,18 +2,18 @@ import cv2
 import numpy as np
 import os
 import sys
-from Detector_Shaft import ShaftDetector
-from Dectector_Ball import BallDetector
-from Tracker_Ball import BallTracker
-from Grass_Filter import GrassFilter
-from States import State
+from Detectors.Detector_Shaft import ShaftDetector
+from Detectors.Detector_Ball import BallDetector
+from Trackers.Tracker_Ball import BallTracker
+from Misc.Grass_Filter import GrassFilter
+from Misc.States import State
 
 class GolfBallDetector:
     def __init__(self, video_path, template_path, display_mode="original"):
         """Initialize the detector with video and template paths."""
         self.display_mode = display_mode  # Options: "original", "grayscale", "edges", "roi"
-        self.video_path = video_path
-        self.template_path = template_path
+        self.video_path = ".\Videos\\" + video_path
+        self.template_path = ".\Templates\\" + template_path
         self.window_name = f"Golf Ball Detector - {self.display_mode}"
         
         self.contact_point = (0,0)
@@ -26,13 +26,13 @@ class GolfBallDetector:
         print("Starting golf ball detection...")
 
         # Validate file paths
-        if not os.path.exists(self.video_path) or not os.path.exists(template_path):
+        if not os.path.exists(self.video_path) or not os.path.exists(self.template_path):
             print("Error: Video or template file not found.")
             sys.exit(1)
         
         # Load video and template
         self.cap = cv2.VideoCapture(self.video_path)
-        self.template = cv2.imread(template_path, 0)
+        self.template = cv2.imread(self.template_path, 0)
         self.template = cv2.resize(self.template, (int(self.template.shape[1] * 1.5), int(self.template.shape[0] * 1.5)))
         self.t_h, self.t_w = self.template.shape
         

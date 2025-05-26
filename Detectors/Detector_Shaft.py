@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from States import State
+from Misc.States import State
 
 class ShaftDetector:
     def __init__(self, width, height):
