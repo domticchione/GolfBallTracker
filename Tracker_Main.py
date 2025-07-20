@@ -15,7 +15,7 @@ class GolfBallDetector:
         self.video_path = ".\Videos\\" + video_path
         self.template_path = ".\Templates\\" + template_path
         self.window_name = f"Golf Ball Detector - {self.display_mode}"
-        
+        self.frame_rate = 30
         self.contact_point = (0,0)
         self.contact_detected = False
         self.prev_distance = None
@@ -128,7 +128,7 @@ class GolfBallDetector:
                     self.contact_detected = True
                     self.state = State.TRACKING_BALL
                     self.contact_point = ball_position
-                    self.ball_tracker = BallTracker(self.width, self.height, self.template, self.contact_point)
+                    self.ball_tracker = BallTracker(self.width, self.height, self.template, self.contact_point, self.frame_rate)
             
             self.prev_distance = distance
 
@@ -149,6 +149,27 @@ class GolfBallDetector:
             print(f"Processed {self.frame_count} frames...")
         
         return True, key
+    
+    def get_framerate(self, video_path):
+        try:
+            # Open the video file
+            video = cv2.VideoCapture(video_path)
+        
+            # Check if video opened successfully
+            if not video.isOpened():
+                print("Error: Could not open video file")
+                return None
+            
+            # Get the framerate
+            fps = video.get(cv2.CAP_PROP_FPS)
+        
+            # Release the video object
+            video.release()
+        
+            return fps
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            return None
 
     def cleanup(self):
         """Release resources and close windows."""
@@ -158,6 +179,7 @@ class GolfBallDetector:
 
     def run(self):
         """Main loop to process video frames."""
+        self.frame_rate = self.get_framerate(self.video_path)
         while self.cap.isOpened():
             continue_loop, key = self.process_frame()
             if not continue_loop:
