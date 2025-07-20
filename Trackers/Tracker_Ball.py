@@ -27,7 +27,7 @@ class BallTracker:
         """Track the golf ball's flight path and draw on the provided display frame."""
         # Get the last known position of the ball from the position history
         last_pos = self.ball_position_history[-1]
-        best_circle = None
+        
         # Crop the frame to focus only on the region above the contact point (where the ball is expected to move)
         crop_y_end = max(1, int(self.contact_point[1]))
         if crop_y_end >= self.height or crop_y_end <= self.t_h:
@@ -185,16 +185,22 @@ class BallTracker:
                 else:
                     print(f"BallTracker: Frame {frame_count}: No Hough circles detected in ROI")
 
-        # Draw the ball's flight path by connecting consecutive positions with green lines
+                # Draw smooth trajectory using position history
         for i in range(1, len(self.ball_position_history)):
             pt1 = (int(self.ball_position_history[i-1][0]), int(self.ball_position_history[i-1][1]))
-            pt2 = None
-            if best_circle != None:
-                pt2 = (int(best_circle[0]), int(best_circle[1]))
-            else:
-                pt2 = (int(self.ball_position_history[i][0]), int(self.ball_position_history[i][1]))
-            
+            pt2 = (int(self.ball_position_history[i][0]), int(self.ball_position_history[i][1]))
             cv2.line(display_frame, pt1, pt2, (0, 255, 0), 2)
+
+        # # Draw the ball's flight path by connecting consecutive positions with green lines
+        # for i in range(1, len(self.ball_position_history)):
+        #     pt1 = (int(self.ball_position_history[i-1][0]), int(self.ball_position_history[i-1][1]))
+        #     pt2 = None
+        #     if best_circle != None:
+        #         pt2 = (int(best_circle[0]), int(best_circle[1]))
+        #     else:
+        #         pt2 = (int(self.ball_position_history[i][0]), int(self.ball_position_history[i][1]))
+            
+        #     cv2.line(display_frame, pt1, pt2, (0, 255, 0), 2)
 
         # Return the current ball position and the modified display frame
         return self.ball_position, display_frame
