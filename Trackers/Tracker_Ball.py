@@ -108,40 +108,14 @@ class BallTracker:
                 self.prediction_started = True
                 print(f"BallTracker: Frame {frame_count}: Using last position {new_pos}")
 
-
-        # if new_pos is None:
-        #     print(f"BallTracker: Frame {frame_count}: Ball not found in cropped region")
-        #     if len(self.ball_position_history) > 1:
-        #         # Use the two most recent positions to estimate velocity
-        #         prev_pos = self.ball_position_history[-2]
-        #         curr_pos = self.ball_position_history[-1]
-        #         # Apply a damping factor to reduce the effect of velocity over time
-        #         damping_factor = 1
-        #         velocity = (damping_factor * (curr_pos[0] - prev_pos[0]), damping_factor * (curr_pos[1] - prev_pos[1]))
-        #         # Predict the next position based on current position and damped velocity
-        #         predicted_pos = (curr_pos[0] + velocity[0], curr_pos[1] + velocity[1])
-        #         new_pos = predicted_pos
-        #         # Switch to prediction mode once template matching fails
-        #         self.prediction_started = True
-        #         print(f"BallTracker: Frame {frame_count}: Using damped predicted position {new_pos}, damping={damping_factor}")
-        #     else:
-        #         # If there's only one position in history, use the last known position
-        #         new_pos = last_pos
-        #         self.prediction_started = True
-        #         print(f"BallTracker: Frame {frame_count}: Using last position {new_pos}")
-
-        # Update the current ball position and append it to the history
-        self.ball_position = new_pos
-        self.ball_position_history.append(new_pos)
-
-        # Draw a red circle around the current ball position on the display frame
-        ball_pos_int = (int(self.ball_position[0]), int(self.ball_position[1]))
+        # Draw a red circle around the previous ball position on the display frame
+        ball_pos_int = (int(new_pos[0]), int(new_pos[1]))
         cv2.circle(display_frame, ball_pos_int, self.t_w * 2, (0, 0, 255), 2)
 
         # Apply Hough Circle detection in a region of interest (ROI) around the predicted position
         if self.prediction_started:
             # Define the size of the ROI (4 times the template width)
-            roi_size = int(self.t_w * 4)
+            roi_size = int(self.t_w * 2)
             # Calculate ROI boundaries, ensuring they stay within the frame
             roi_x = max(0, ball_pos_int[0] - roi_size // 2)
             roi_y = max(0, ball_pos_int[1] - roi_size // 2)
@@ -162,45 +136,40 @@ class BallTracker:
                     minDist=20,  # Minimum distance between detected circles
                     param1=150,  # Canny edge detector threshold
                     param2=1,  # Accumulator threshold for circle detection
-                    minRadius=int(0),  # Minimum circle radius
-                    maxRadius=int(self.t_w * 0.5)  # Maximum circle radius
+                    minRadius=0,  # Minimum circle radius
+                    maxRadius=int(self.t_w * 0.2)  # Maximum circle radius
                 )
                 if circles is not None:
                     # Round circle coordinates and convert to integers
                     circles = np.round(circles[0, :]).astype("int")
                     best_circle = None
-                    min_dist = float('inf')
+                    min_dist = float(30)
                     # Find the circle closest to the predicted position
                     for (x, y, r) in circles:
                         circle_pos = (x + roi_x, y + roi_y)
                         dist = np.sqrt((circle_pos[0] - ball_pos_int[0])**2 + (circle_pos[1] - ball_pos_int[1])**2)
                         if dist < min_dist:
                             min_dist = dist
-                            best_circle = (circle_pos[0], circle_pos[1], r)
+                            #best_circle = (circle_pos[0], circle_pos[1], r)
                     if best_circle:
                         # If a valid circle is found, draw a yellow circle around it
                         hough_pos = (best_circle[0], best_circle[1])
+                        new_pos = hough_pos
+                        
                         print(f"BallTracker: Frame {frame_count}: Hough circle detected at {hough_pos}, radius={best_circle[2]}")
                         cv2.circle(display_frame, (int(hough_pos[0]), int(hough_pos[1])), best_circle[2] * 2, (0, 255, 255), 2)
                 else:
                     print(f"BallTracker: Frame {frame_count}: No Hough circles detected in ROI")
 
-                # Draw smooth trajectory using position history
+        # Update position history with new_pos (either template match, prediction, or Hough)
+        self.ball_position = new_pos
+        self.ball_position_history.append(new_pos)
+
+        # Draw smooth trajectory using position history
         for i in range(1, len(self.ball_position_history)):
             pt1 = (int(self.ball_position_history[i-1][0]), int(self.ball_position_history[i-1][1]))
             pt2 = (int(self.ball_position_history[i][0]), int(self.ball_position_history[i][1]))
             cv2.line(display_frame, pt1, pt2, (0, 255, 0), 2)
-
-        # # Draw the ball's flight path by connecting consecutive positions with green lines
-        # for i in range(1, len(self.ball_position_history)):
-        #     pt1 = (int(self.ball_position_history[i-1][0]), int(self.ball_position_history[i-1][1]))
-        #     pt2 = None
-        #     if best_circle != None:
-        #         pt2 = (int(best_circle[0]), int(best_circle[1]))
-        #     else:
-        #         pt2 = (int(self.ball_position_history[i][0]), int(self.ball_position_history[i][1]))
-            
-        #     cv2.line(display_frame, pt1, pt2, (0, 255, 0), 2)
 
         # Return the current ball position and the modified display frame
         return self.ball_position, display_frame

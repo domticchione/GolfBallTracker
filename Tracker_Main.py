@@ -15,7 +15,7 @@ class GolfBallDetector:
         self.video_path = ".\Videos\\" + video_path
         self.template_path = ".\Templates\\" + template_path
         self.window_name = f"Golf Ball Detector - {self.display_mode}"
-        self.frame_rate = 30
+        self.frame_rate = 60
         self.contact_point = (0,0)
         self.contact_detected = False
         self.prev_distance = None
